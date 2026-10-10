@@ -3,1186 +3,726 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#10151b">
-<title>BlockWorld | Build Your World</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#76b8f2">
+<title>BlockWorld</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#10151b;color:white;font-family:Arial,sans-serif;overflow:hidden}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:Arial,sans-serif;background:#87ceeb}
+canvas{display:block}
 #game{position:fixed;inset:0}
-canvas{display:block;touch-action:none}
-#topbar{position:fixed;top:0;left:0;right:0;padding:15px 22px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(#10151bdd,transparent);pointer-events:none;z-index:3}
-.logo{font-size:24px;font-weight:900;letter-spacing:1px}
-.logo span{color:#70ed86}
-#stats{text-align:right;color:#d6e1e8;font-size:12px;line-height:1.8}
-#menu{position:fixed;inset:0;background:linear-gradient(120deg,#101a25ee,#15291de8);display:flex;align-items:center;justify-content:center;z-index:10}
-.panel{width:min(570px,94vw);max-height:90vh;overflow:auto;padding:30px;border:1px solid #ffffff25;border-radius:22px;background:#111b26f5;box-shadow:0 25px 90px #0009}
-.eyebrow{color:#75ef8a;letter-spacing:3px;font-size:11px;font-weight:bold}
-h1{font-size:clamp(40px,9vw,68px);line-height:.95;margin:17px 0}
-h1 span{color:#70ed86}
-.panel p{color:#b5c4d2;line-height:1.7}
-button{border:0;border-radius:10px;padding:12px 16px;font-weight:bold;cursor:pointer}
-.primary{background:#6aee83;color:#102016;width:100%;margin-top:14px;font-size:16px}
-.secondary{background:#263646;color:white}
-.row{display:flex;gap:10px;margin-top:10px}
-.row button{flex:1}
-#help{position:fixed;left:15px;top:90px;padding:12px 15px;background:#111923d9;border:1px solid #ffffff20;border-radius:12px;font-size:11px;line-height:1.9;pointer-events:none;z-index:2}
-#help b{color:#79ef90}
-#crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:25px;text-shadow:0 1px 5px black;pointer-events:none;display:none}
-#hotbar{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);display:none;gap:4px;padding:7px;background:#111923ed;border:1px solid #ffffff35;border-radius:12px;max-width:96vw;overflow-x:auto;z-index:3}
-.slot{width:57px;height:59px;border:2px solid #ffffff28;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;background:#ffffff08;cursor:pointer;flex-shrink:0}
-.slot.selected{border-color:#77f18a;background:#77f18a22;transform:translateY(-3px)}
-.swatch{width:24px;height:24px;border:1px solid #ffffff40;border-radius:3px;box-shadow:inset -5px -5px 0 #0002}
-.slot small{font-size:9px;color:#e1e8ee}
-.slot em{position:absolute;right:3px;top:2px;font-size:9px;font-style:normal;color:#c9d5df}
-#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);padding:10px 16px;background:#13251be8;border:1px solid #6aee8355;border-radius:20px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:5}
-#toast.show{opacity:1}
-#touch{display:none;position:fixed;bottom:100px;left:10px;grid-template-columns:repeat(3,46px);gap:4px;z-index:4}
-#touch button{width:46px;height:46px;padding:0;background:#172533dd;color:white;border:1px solid #ffffff55;touch-action:none}
-#mobileActions{display:none;position:fixed;right:12px;bottom:112px;gap:7px;z-index:4;flex-direction:column}
-#mobileActions button{background:#172533dd;color:white;border:1px solid #ffffff55;min-width:75px}
-#lookHelp{position:fixed;bottom:90px;right:12px;color:#fff9;font-size:10px;display:none}
-@media(max-width:650px){
- #help{top:76px;left:7px;font-size:9px;padding:7px}
- #topbar{padding:11px}
- .logo{font-size:19px}
- .slot{width:43px;height:52px}
- .swatch{width:20px;height:20px}
- #hotbar{bottom:6px;padding:4px;gap:2px;justify-content:flex-start}
- #touch{display:grid}
- #mobileActions{display:flex}
- #lookHelp{display:block}
+#hud{position:fixed;top:12px;left:12px;z-index:5;color:white;text-shadow:2px 2px 3px #222;pointer-events:none}
+#logo{font-size:26px;font-weight:900;letter-spacing:1px}
+#stats{margin-top:6px;font-size:13px}
+#topButtons{position:fixed;top:12px;right:12px;display:flex;gap:7px;z-index:10}
+button{border:2px solid #333;border-radius:7px;background:#eee;color:#222;font-weight:bold;padding:10px 12px;cursor:pointer;box-shadow:0 3px 0 #777}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #777}
+#hotbar{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:8;max-width:96vw;overflow-x:auto;padding:5px;background:#2229;border:2px solid #ffffff88;border-radius:9px}
+.slot{flex:0 0 47px;height:48px;background:#777b;border:2px solid #bbb;position:relative;display:flex;align-items:center;justify-content:center;font-size:25px}
+.slot.selected{border:3px solid #fff;background:#ddd9;transform:translateY(-4px)}
+.slot small{position:absolute;bottom:1px;right:3px;color:white;font-size:10px;text-shadow:1px 1px #000}
+#menu{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#0009}
+.panel{background:#eee;color:#222;border:4px solid #555;border-radius:12px;padding:24px;width:min(420px,92vw);text-align:center;box-shadow:0 8px 30px #0008}
+.panel h1{margin:0 0 8px;font-size:32px}
+.panel p{line-height:1.5}
+.panel button{margin:5px;min-width:125px}
+#help{position:fixed;left:12px;bottom:83px;color:white;text-shadow:2px 2px 3px #222;font-size:12px;z-index:5;pointer-events:none}
+#toast{position:fixed;top:75px;left:50%;transform:translateX(-50%);z-index:15;background:#222d;color:white;padding:10px 16px;border-radius:8px;display:none}
+#crosshair{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:white;font-size:24px;text-shadow:1px 1px 2px #000;z-index:4;pointer-events:none}
+#mobileControls{display:none;position:fixed;bottom:95px;left:12px;z-index:10;gap:5px;align-items:center}
+#mobileControls button{width:48px;height:45px;padding:0;font-size:20px;background:#eeeeeed9}
+#mobileRight{position:fixed;right:12px;bottom:95px;z-index:10;display:none;gap:6px;flex-direction:column}
+#mobileRight button{min-width:64px;padding:12px 8px;background:#eeeeeed9}
+#searchLabel{font-size:12px;color:#555;margin-top:12px}
+.hidden{display:none!important}
+@media(max-width:700px){
+ #logo{font-size:21px}
+ #stats{font-size:11px}
+ #topButtons{top:8px;right:8px;gap:4px}
+ #topButtons button{font-size:11px;padding:8px}
+ #mobileControls{display:grid;grid-template-columns:repeat(3,48px)}
+ #mobileRight{display:flex}
+ #help{display:none}
+ #hotbar{bottom:8px;gap:3px}
+ .slot{flex-basis:39px;height:41px;font-size:21px}
 }
 </style>
 </head>
-
 <body>
 <div id="game"></div>
-
-<div id="topbar">
-  <div class="logo">BLOCK<span>WORLD</span></div>
-  <div id="stats">CREATIVE MODE<br>GREEN VALLEY</div>
+<div id="hud">
+  <div id="logo">🧱 BlockWorld</div>
+  <div id="stats">Loading world...</div>
 </div>
-
-<div id="help">
-  <b>W A S D</b> Move<br>
-  <b>MOUSE</b> Look around<br>
-  <b>LEFT CLICK</b> Mine<br>
-  <b>RIGHT CLICK</b> Place blocks<br>
-  <b>SPACE</b> Jump / fly up<br>
-  <b>SHIFT</b> Fly down<br>
-  <b>1–9</b> Select blocks<br>
-  <b>WHEEL</b> Change block<br>
-  <b>ESC</b> Pause
+<div id="topButtons">
+  <button id="modeButton">Creative</button>
+  <button id="saveButton">Save</button>
+  <button id="menuButton">☰ Menu</button>
 </div>
-
+<div id="help">WASD: Move · Mouse: Look · Space: Jump/Fly · Left click: Mine · Right click: Place · Esc: Menu</div>
 <div id="crosshair">+</div>
 <div id="toast"></div>
 <div id="hotbar"></div>
-
-<div id="touch">
-  <button data-key="w" style="grid-column:2;grid-row:1">▲</button>
-  <button data-key="a" style="grid-column:1;grid-row:2">◀</button>
-  <button data-key="s" style="grid-column:2;grid-row:2">▼</button>
-  <button data-key="d" style="grid-column:3;grid-row:2">▶</button>
+<div id="mobileControls">
+  <span></span><button data-move="forward">▲</button><span></span>
+  <button data-move="left">◀</button><button data-move="back">▼</button><button data-move="right">▶</button>
 </div>
-
-<div id="mobileActions">
-  <button id="jumpBtn">JUMP ▲</button>
-  <button id="mineBtn">MINE ⛏</button>
-  <button id="placeBtn">PLACE ▪</button>
+<div id="mobileRight">
+  <button id="jumpButton">⬆ Jump</button>
+  <button id="mineButton">⛏ Mine</button>
+  <button id="placeButton">▧ Place</button>
 </div>
-<div id="lookHelp">Drag across the screen to look around</div>
 
 <div id="menu">
-  <div class="panel">
-    <div class="eyebrow">YOUR WORLD. YOUR RULES.</div>
-    <h1>BUILD.<br>EXPLORE.<br><span>CREATE.</span></h1>
-    <p>Explore a blocky 3D world. Mine resources, build houses, discover villages, and meet villagers wandering around their homes.</p>
-    <div class="row">
-      <button class="secondary" id="creativeBtn">CREATIVE: ON</button>
-      <button class="secondary" id="resetBtn">NEW WORLD</button>
-    </div>
-    <button class="primary" id="playBtn">▶ PLAY BLOCKWORLD</button>
-    <p style="font-size:11px">WASD to move · Mouse to look · Click to mine and build</p>
-  </div>
+ <div class="panel">
+  <h1>🧱 BlockWorld</h1>
+  <p>Explore a bigger block world full of villages, houses, farms, forests, and villagers!</p>
+  <button id="playButton">▶ Play</button>
+  <button id="newWorldButton">🌎 New World</button>
+  <button id="menuModeButton">Switch Mode</button>
+  <p id="worldInfo">Large world · Villages waiting to be explored</p>
+  <div id="searchLabel">Desktop: click Play, then click the game to capture your mouse. Press Esc to open this menu.</div>
+ </div>
 </div>
 
 <script type="module">
-import * as THREE from
-'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
 
-/* =========================
-   SETUP
-========================= */
+const game = document.getElementById('game');
+const stats = document.getElementById('stats');
+const hotbar = document.getElementById('hotbar');
+const menu = document.getElementById('menu');
+const toastBox = document.getElementById('toast');
 
-const game=document.getElementById('game');
-const menu=document.getElementById('menu');
-const crosshair=document.getElementById('crosshair');
-const hotbar=document.getElementById('hotbar');
-const stats=document.getElementById('stats');
-const toastEl=document.getElementById('toast');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 45, 135);
 
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x83c9f4);
-scene.fog=new THREE.Fog(0x83c9f4,38,95);
-
-const camera=new THREE.PerspectiveCamera(
- 75,innerWidth/innerHeight,.1,150
-);
-camera.rotation.order='YXZ';
-
-const renderer=new THREE.WebGLRenderer({
- antialias:false
-});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-renderer.shadowMap.enabled=true;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.outputColorSpace=THREE.SRGBColorSpace;
+const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 250);
+const renderer = new THREE.WebGLRenderer({antialias:false, powerPreference:'high-performance'});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.shadowMap.enabled = false;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 game.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xd8efff,0x53633b,2));
-
-const sun=new THREE.DirectionalLight(0xfff1cf,2.3);
-sun.position.set(-20,35,15);
-sun.castShadow=true;
-sun.shadow.mapSize.set(1024,1024);
-sun.shadow.camera.left=-35;
-sun.shadow.camera.right=35;
-sun.shadow.camera.top=35;
-sun.shadow.camera.bottom=-35;
+scene.add(new THREE.HemisphereLight(0xdaf0ff, 0x66553a, 2.0));
+const sun = new THREE.DirectionalLight(0xfff4dc, 2.1);
+sun.position.set(-35, 70, 25);
 scene.add(sun);
 
-/* =========================
-   BLOCK TYPES
-========================= */
+const blockTypes = [
+ {name:'Grass',color:0x5caa42,emoji:'🟩'},
+ {name:'Dirt',color:0x80502f,emoji:'🟫'},
+ {name:'Stone',color:0x888888,emoji:'⬜'},
+ {name:'Wood',color:0x916039,emoji:'🪵'},
+ {name:'Leaves',color:0x27783b,emoji:'🌳'},
+ {name:'Sand',color:0xdcc77b,emoji:'🟨'},
+ {name:'Brick',color:0xa64f3d,emoji:'🧱'},
+ {name:'Planks',color:0xc99a59,emoji:'🪵'},
+ {name:'Cobble',color:0x666b70,emoji:'◽'},
+ {name:'Glass',color:0x9be5ed,emoji:'🔹'},
+ {name:'Gold',color:0xf7c932,emoji:'🟡'},
+ {name:'Diamond',color:0x28e1d0,emoji:'💎'},
+ {name:'Snow',color:0xf5fbff,emoji:'❄️'},
+ {name:'Clay',color:0xb77b68,emoji:'🟤'},
+ {name:'Bedrock',color:0x292929,emoji:'⬛'},
+ {name:'Glowstone',color:0xffd45c,emoji:'💡'},
+ {name:'Moss',color:0x477b4a,emoji:'🌿'},
+ {name:'Pumpkin',color:0xe87823,emoji:'🎃'},
+ {name:'Bookshelf',color:0x9b6a39,emoji:'📚'},
+ {name:'Wool',color:0xd7d7e4,emoji:'⬜'}
+];
+const materials = blockTypes.map((b,i)=>new THREE.MeshLambertMaterial({
+ color:b.color,
+ transparent:i===9,
+ opacity:i===9?0.42:1
+}));
+const cubeGeometry = new THREE.BoxGeometry(1,1,1);
+const blocks = new Map();
+const blockMeshes = new Map();
+const villagers = [];
+const decorations = [];
+const keys = {};
+let selectedBlock = 0;
+let creative = true;
+let pointerLocked = false;
+let worldSeed = Math.floor(Math.random()*999999);
+let worldRadius = 42;
+let blockCount = 0;
+let lastSave = 0;
+let toastTimer;
 
-const materials={
- Grass:0x68b94e,
- Dirt:0x79502f,
- Stone:0x858c95,
- Wood:0x95602f,
- Leaves:0x328647,
- Sand:0xe4d08a,
- Brick:0xb95342,
- Planks:0xc99a59,
- Cobble:0x666d76,
- Glass:0x9de7f0,
- Gold:0xf5c842,
- Diamond:0x37e0cf,
- Snow:0xf1f6ff,
- Clay:0xb67b64,
- Bedrock:0x30343b,
- Glowstone:0xffdc71,
- Moss:0x426e39,
- Pumpkin:0xe98a2f,
- Bookshelf:0x80502e,
- Wool:0xdfd8c9
-};
+const player = {x:0,y:5,z:0,vy:0,onGround:false};
+let yaw = 0;
+let pitch = -0.18;
+const eyeHeight = 1.62;
+const raycaster = new THREE.Raycaster();
+raycaster.far = 7;
+const screenCenter = new THREE.Vector2(0,0);
+const clock = new THREE.Clock();
 
-const mat={};
-
-for(const name in materials){
- mat[name]=new THREE.MeshLambertMaterial({
-  color:materials[name],
-  transparent:name==='Glass',
-  opacity:name==='Glass'?.48:1
- });
+function key(x,y,z){return `${Math.round(x)},${Math.round(y)},${Math.round(z)}`;}
+function parseKey(k){return k.split(',').map(Number);}
+function seededNoise(x,z){
+ let n = Math.sin((x+worldSeed)*12.9898+(z-worldSeed)*78.233)*43758.5453;
+ return n-Math.floor(n);
 }
-
-const cubeGeometry=new THREE.BoxGeometry(1,1,1);
-const blocks=new Map();
-const blockMeshes=[];
-const heightMap=new Map();
-const worldGroup=new THREE.Group();
-
-scene.add(worldGroup);
-
-const keyOf=(x,y,z)=>`${x},${y},${z}`;
-const blockTypes=Object.keys(materials);
-
-let selected=0;
-let playing=false;
-let creative=true;
-let yaw=0;
-let pitch=0;
-let velocityY=0;
-let onGround=false;
-
-const player={x:0,y:5,z:0};
-const keys={};
-
-const raycaster=new THREE.Raycaster();
-raycaster.far=7;
-const center=new THREE.Vector2(0,0);
-
-let villagers=[];
-let lastSaveTimer=null;
-let worldVersion=0;
-
-/* =========================
-   BLOCK MANAGEMENT
-========================= */
-
-function addBlock(x,y,z,type,save=true){
- x=Math.round(x);
- y=Math.round(y);
- z=Math.round(z);
-
- const key=keyOf(x,y,z);
- if(blocks.has(key))return false;
- if(!mat[type])type='Dirt';
-
- const mesh=new THREE.Mesh(cubeGeometry,mat[type]);
+function terrainHeight(x,z){
+ const rolling = Math.sin((x+worldSeed%17)*0.11)*1.4+
+                 Math.cos((z-worldSeed%23)*0.13)*1.3+
+                 Math.sin((x+z)*0.07)*1.1;
+ const hills = Math.max(0,Math.sin((x*0.17+z*0.09+worldSeed%31))*1.8);
+ return Math.max(2,Math.floor(4+rolling+hills));
+}
+function toast(message){
+ toastBox.textContent=message;
+ toastBox.style.display='block';
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>toastBox.style.display='none',2200);
+}
+function addBlock(x,y,z,type=0,save=true){
+ x=Math.round(x);y=Math.round(y);z=Math.round(z);
+ const k=key(x,y,z);
+ if(blocks.has(k)) return false;
+ const t=Math.max(0,Math.min(blockTypes.length-1,type));
+ const mesh=new THREE.Mesh(cubeGeometry,materials[t]);
  mesh.position.set(x,y,z);
- mesh.castShadow=true;
- mesh.receiveShadow=true;
  mesh.userData={x,y,z,type};
-
- worldGroup.add(mesh);
- blocks.set(key,mesh);
- blockMeshes.push(mesh);
-
- if(save)saveWorld();
+ scene.add(mesh);
+ blocks.set(k,{x,y,z,type,mesh});
+ blockMeshes.set(k,mesh);
+ blockCount++;
  return true;
 }
-
-function removeBlock(mesh){
- if(!mesh)return;
-
- const {x,y,z}=mesh.userData;
- if(y<=0)return;
-
- worldGroup.remove(mesh);
- blocks.delete(keyOf(x,y,z));
-
- const i=blockMeshes.indexOf(mesh);
- if(i!==-1)blockMeshes.splice(i,1);
-
- saveWorld();
+function removeBlock(x,y,z){
+ const k=key(x,y,z), b=blocks.get(k);
+ if(!b || b.type===14) return false;
+ scene.remove(b.mesh);
+ blocks.delete(k);
+ blockMeshes.delete(k);
+ blockCount--;
+ return true;
 }
-
-function groundHeight(x,z){
- return heightMap.get(
-  `${Math.round(x)},${Math.round(z)}`
- )??2;
+function hasBlock(x,y,z){return blocks.has(key(x,y,z));}
+function surfaceY(x,z){return terrainHeight(x,z);}
+function fillArea(x1,z1,x2,z2,type,yOverride=null){
+ for(let x=Math.min(x1,x2);x<=Math.max(x1,x2);x++){
+  for(let z=Math.min(z1,z2);z<=Math.max(z1,z2);z++){
+   const y=yOverride===null?surfaceY(x,z):yOverride;
+   addBlock(x,y,z,type);
+  }
+ }
 }
+function buildTree(x,z){
+ const base=surfaceY(x,z);
+ const h=3+Math.floor(seededNoise(x,z)*3);
+ for(let y=1;y<=h;y++) addBlock(x,base+y,z,3);
+ for(let dx=-2;dx<=2;dx++){
+  for(let dz=-2;dz<=2;dz++){
+   for(let dy=h-1;dy<=h+2;dy++){
+    if(Math.abs(dx)+Math.abs(dz)+(dy===h+2?1:0)<=4 && seededNoise(x+dx*3+dy,z+dz*2)>0.05)
+     addBlock(x+dx,base+dy,z+dz,4);
+   }
+  }
+ }
+}
+function buildHouse(cx,cz,style=0){
+ const ground=surfaceY(cx,cz);
+ const width=5+(style%2)*2, depth=5+((style+1)%2)*2, wallH=3+(style%3===0?1:0);
+ const x1=cx-Math.floor(width/2),x2=cx+Math.floor(width/2);
+ const z1=cz-Math.floor(depth/2),z2=cz+Math.floor(depth/2);
+ const wallType=[6,7,3,13,8,7][style%6];
+ const roofType=[6,3,7,8,13,6][style%6];
 
-/* =========================
-   HOTBAR
-========================= */
+ // Clear space where the house will stand, including trees and ground clutter.
+ for(let x=x1-1;x<=x2+1;x++){
+  for(let z=z1-1;z<=z2+1;z++){
+   for(let y=ground+1;y<=ground+wallH+4;y++) removeBlock(x,y,z);
+  }
+ }
+ // A level floor gives houses a proper foundation even on rolling terrain.
+ for(let x=x1;x<=x2;x++){
+  for(let z=z1;z<=z2;z++){
+   for(let y=ground-1;y<=ground;y++) removeBlock(x,y,z);
+   addBlock(x,ground,z,8);
+  }
+ }
+ for(let y=1;y<=wallH;y++){
+  for(let x=x1;x<=x2;x++){
+   for(let z=z1;z<=z2;z++){
+    if(x===x1||x===x2||z===z1||z===z2){
+     const isDoor=(x===cx&&z===z2&&y<=2);
+     const isWindow=(y===2&&((x===x1||x===x2)&&(z===cz||z===cz+1)|| (z===z1)&&(x===cx-1||x===cx+1)));
+     if(!isDoor) addBlock(x,ground+y,z,isWindow?9:wallType);
+    }
+   }
+  }
+ }
+ // Roof with a small overhang and a peaked-looking top.
+ for(let x=x1-1;x<=x2+1;x++){
+  for(let z=z1-1;z<=z2+1;z++){
+   addBlock(x,ground+wallH+1,z,roofType);
+  }
+ }
+ for(let layer=1;layer<=2;layer++){
+  for(let x=x1+layer-1;x<=x2-layer+1;x++){
+   addBlock(x,ground+wallH+1+layer,z1+layer-1,roofType);
+   addBlock(x,ground+wallH+1+layer,z2-layer+1,roofType);
+  }
+ }
+ // Interior lighting and furnishings.
+ addBlock(cx,ground+wallH,cz,15);
+ addBlock(cx-1,ground+1,cz,18);
+ addBlock(cx+1,ground+1,cz,7);
+ // Doorstep and path pointing out from the front door.
+ for(let p=1;p<=4;p++){
+  const px=cx, pz=z2+p;
+  const py=surfaceY(px,pz);
+  addBlock(px,py,pz,8);
+ }
+}
+function buildFarm(cx,cz){
+ const y=surfaceY(cx,cz);
+ for(let x=cx-4;x<=cx+4;x++){
+  for(let z=cz-3;z<=cz+3;z++){
+   addBlock(x,y,z,13);
+  }
+ }
+ for(let z=cz-2;z<=cz+2;z++){
+  addBlock(cx,y+1,z,5);
+  if(z%2===0) addBlock(cx-1,y+1,z,17);
+ }
+ for(let x=cx-3;x<=cx+3;x++){
+  addBlock(x,y+1,cz-1,17);
+  if(x%2===0) addBlock(x,y+1,cz+1,17);
+ }
+ // Water trough.
+ for(let x=cx-1;x<=cx+1;x++) addBlock(x,y+1,cz,9);
+}
+function buildVillage(cx,cz,index){
+ // Flatten a broad village centre and leave room around each house.
+ for(let x=cx-14;x<=cx+14;x++){
+  for(let z=cz-14;z<=cz+14;z++){
+   const y=surfaceY(x,z);
+   if(Math.abs(x-cx)<12&&Math.abs(z-cz)<12){
+    addBlock(x,y,z,0);
+    if(Math.abs(x-cx)<10&&Math.abs(z-cz)<10) addBlock(x,y+1,z,0);
+   }
+  }
+ }
+ // Main crossing paths.
+ for(let p=-13;p<=13;p++){
+  let y=surfaceY(cx+p,cz);
+  addBlock(cx+p,y,cz,8);
+  y=surfaceY(cx,cz+p);
+  addBlock(cx,y,cz+p,8);
+ }
+ // Six houses in a ring around the centre of every village.
+ const placements=[
+  [-8,-7],[8,-7],[-8,7],[8,7],[0,-10],[0,10]
+ ];
+ placements.forEach((pos,i)=>{
+  const hx=cx+pos[0], hz=cz+pos[1];
+  buildHouse(hx,hz,(index+i)%6);
+ });
+ buildFarm(cx-3,cz+3);
+ // Lamps at the path junctions.
+ for(const [dx,dz] of [[-4,0],[4,0],[0,-4],[0,4]]){
+  const x=cx+dx,z=cz+dz,y=surfaceY(x,z);
+  addBlock(x,y+1,z,3);
+  addBlock(x,y+2,z,15);
+ }
+ // Add a little village garden and a well.
+ for(let x=cx-2;x<=cx+2;x++){
+  for(let z=cz-2;z<=cz+2;z++){
+   if(Math.abs(x-cx)===2||Math.abs(z-cz)===2) addBlock(x,surfaceY(x,z)+1,z,8);
+  }
+ }
+ addBlock(cx-1,surfaceY(cx,cz)+1,cz-1,8);
+ addBlock(cx+1,surfaceY(cx,cz)+1,cz-1,8);
+ addBlock(cx-1,surfaceY(cx,cz)+1,cz+1,8);
+ addBlock(cx+1,surfaceY(cx,cz)+1,cz+1,8);
+ addBlock(cx,surfaceY(cx,cz)+1,cz,9);
+ // Villagers roam around the settlement.
+ for(let i=0;i<5;i++){
+  const vx=cx+(seededNoise(cx+i,cz)*12-6);
+  const vz=cz+(seededNoise(cz-i,cx)*12-6);
+  spawnVillager(vx,surfaceY(Math.round(vx),Math.round(vz))+1,vz,index*10+i);
+ }
+}
+function spawnVillager(x,y,z,id){
+ const group=new THREE.Group();
+ const skin=new THREE.MeshLambertMaterial({color:[0xd9a77c,0xc48b62,0xf0c69a][id%3]});
+ const robe=new THREE.MeshLambertMaterial({color:[0x6b8dba,0x8d6047,0x668b46,0x9a6bb1][id%4]});
+ const dark=new THREE.MeshLambertMaterial({color:0x49342b});
+ const body=new THREE.Mesh(new THREE.BoxGeometry(.62,.8,.38),robe);
+ body.position.y=.95;group.add(body);
+ const head=new THREE.Mesh(new THREE.BoxGeometry(.48,.48,.45),skin);
+ head.position.y=1.62;group.add(head);
+ const nose=new THREE.Mesh(new THREE.BoxGeometry(.12,.18,.16),skin);
+ nose.position.set(0,1.58,.29);group.add(nose);
+ for(const ex of [-.12,.12]){
+  const eye=new THREE.Mesh(new THREE.BoxGeometry(.055,.055,.025),dark);
+  eye.position.set(ex,1.69,.23);group.add(eye);
+ }
+ for(const sx of [-.4,.4]){
+  const arm=new THREE.Mesh(new THREE.BoxGeometry(.2,.65,.22),robe);
+  arm.position.set(sx,1.0,0);group.add(arm);
+ }
+ const legsMat=new THREE.MeshLambertMaterial({color:0x514d4a});
+ for(const lx of [-.16,.16]){
+  const leg=new THREE.Mesh(new THREE.BoxGeometry(.22,.45,.25),legsMat);
+  leg.position.set(lx,.38,0);group.add(leg);
+ }
+ group.position.set(x,y,z);
+ scene.add(group);
+ villagers.push({group,x,y,z,phase:Math.random()*6.28,speed:.3+Math.random()*.35,turn:Math.random()*6.28});
+}
+function generateWorld(){
+ // Clear all existing terrain and living entities.
+ for(const b of blocks.values()) scene.remove(b.mesh);
+ blocks.clear();blockMeshes.clear();blockCount=0;
+ for(const v of villagers) scene.remove(v.group);
+ villagers.length=0;
+ for(const d of decorations) scene.remove(d);
+ decorations.length=0;
 
+ // A much larger playable area, with a full layer of ground plus stone below it.
+ for(let x=-worldRadius;x<=worldRadius;x++){
+  for(let z=-worldRadius;z<=worldRadius;z++){
+   const h=terrainHeight(x,z);
+   addBlock(x,h,z,0);
+   addBlock(x,h-1,z,1);
+   if(h>3&&seededNoise(x*2,z*2)>.76) addBlock(x,h-2,z,2);
+   if(seededNoise(x+13,z-9)>.986){
+    for(let y=h+1;y<=h+4;y++) addBlock(x,y,z,3);
+   }
+  }
+ }
+ // Forests are placed between villages. The village footprints are cleared below.
+ for(let x=-worldRadius+3;x<worldRadius-3;x+=3){
+  for(let z=-worldRadius+3;z<worldRadius-3;z+=3){
+   if(seededNoise(x+77,z+29)>.77 && seededNoise(x,z)<.8) buildTree(x,z);
+  }
+ }
+ // Seven settlements, spaced around the expanded map.
+ const villageSpots=[
+  [-28,-27],[-1,-29],[27,-25],
+  [-30,3],[1,2],[29,5],
+  [-10,29]
+ ];
+ villageSpots.forEach((p,i)=>buildVillage(p[0],p[1],i));
+
+ // A few scenic landmarks and patches of sand at the map's outer edge.
+ for(let i=0;i<55;i++){
+  const x=Math.floor(seededNoise(i+200,worldSeed)*worldRadius*2-worldRadius);
+  const z=Math.floor(seededNoise(i+500,worldSeed)*worldRadius*2-worldRadius);
+  if(Math.abs(x)>worldRadius-5||Math.abs(z)>worldRadius-5){
+   const y=surfaceY(x,z);
+   addBlock(x,y,z,5);
+  }
+ }
+ player.x=0;player.z=0;player.y=surfaceY(0,0)+3;player.vy=0;
+ yaw=0;pitch=-.18;
+ toast('Your bigger BlockWorld is ready!');
+ updateStats();
+}
+function saveWorld(){
+ try{
+  const data={
+   seed:worldSeed,
+   radius:worldRadius,
+   creative,
+   player:{x:player.x,y:player.y,z:player.z,yaw,pitch},
+   blocks:Array.from(blocks.values()).map(b=>[b.x,b.y,b.z,b.type])
+  };
+  localStorage.setItem('blockworld-save',JSON.stringify(data));
+  lastSave=Date.now();
+  toast('World saved!');
+ }catch(e){toast('Could not save: storage is full.');}
+}
+function loadWorld(){
+ try{
+  const raw=localStorage.getItem('blockworld-save');
+  if(!raw)return false;
+  const data=JSON.parse(raw);
+  if(!data||!Array.isArray(data.blocks))return false;
+  worldSeed=data.seed||worldSeed;
+  worldRadius=data.radius||42;
+  creative=data.creative!==false;
+  // Regenerate a base world to restore the villagers and scenery, then apply saved blocks.
+  generateWorld();
+  for(const b of blocks.values())scene.remove(b.mesh);
+  blocks.clear();blockMeshes.clear();blockCount=0;
+  for(const row of data.blocks){
+   if(Array.isArray(row)&&row.length>=4)addBlock(row[0],row[1],row[2],row[3],false);
+  }
+  if(data.player){
+   player.x=data.player.x??0;player.y=data.player.y??5;player.z=data.player.z??0;
+   yaw=data.player.yaw??0;pitch=data.player.pitch??-.18;
+  }
+  updateModeButtons();updateStats();
+  toast('Saved world loaded!');
+  return true;
+ }catch(e){return false;}
+}
+function updateStats(){
+ stats.textContent=`${creative?'Creative':'Survival'} · ${blockCount.toLocaleString()} blocks · World ${worldRadius*2+1} × ${worldRadius*2+1} · 7 villages`;
+}
+function updateModeButtons(){
+ document.getElementById('modeButton').textContent=creative?'Creative':'Survival';
+ document.getElementById('menuModeButton').textContent=creative?'Switch to Survival':'Switch to Creative';
+ updateStats();
+}
+function switchMode(){
+ creative=!creative;
+ updateModeButtons();
+ toast(creative?'Creative mode: fly and build freely':'Survival mode: gravity and jumping enabled');
+}
 function buildHotbar(){
  hotbar.innerHTML='';
-
- blockTypes.forEach((type,i)=>{
+ blockTypes.forEach((b,i)=>{
   const slot=document.createElement('div');
-  slot.className='slot'+(i===selected?' selected':'');
-
-  slot.innerHTML=
-   `<em>${i<9?i+1:'•'}</em>`+
-   `<div class="swatch" style="background:#${materials[type].toString(16).padStart(6,'0')}"></div>`+
-   `<small>${type}</small>`;
-
-  slot.onclick=()=>{
-   selected=i;
-   buildHotbar();
-   toast(type+' selected');
-  };
-
+  slot.className='slot'+(i===selectedBlock?' selected':'');
+  slot.title=b.name;
+  slot.innerHTML=`${b.emoji}<small>${i+1}</small>`;
+  slot.addEventListener('click',()=>selectBlock(i));
   hotbar.appendChild(slot);
  });
 }
-
-function toast(message){
- toastEl.textContent=message;
- toastEl.classList.add('show');
-
- clearTimeout(toast.timer);
- toast.timer=setTimeout(()=>{
-  toastEl.classList.remove('show');
- },1700);
+function selectBlock(i){
+ selectedBlock=(i+blockTypes.length)%blockTypes.length;
+ [...hotbar.children].forEach((el,n)=>el.classList.toggle('selected',n===selectedBlock));
 }
-
-buildHotbar();
-
-/* =========================
-   SAVING
-========================= */
-
-function saveWorld(){
- clearTimeout(lastSaveTimer);
-
- lastSaveTimer=setTimeout(()=>{
-  try{
-   const data=[];
-
-   for(const mesh of blockMeshes){
-    const {x,y,z,type}=mesh.userData;
-    data.push([x,y,z,type]);
-   }
-
-   localStorage.setItem('blockworld-save',JSON.stringify(data));
-  }catch(error){
-   console.warn('Unable to save world:',error);
-  }
- },700);
-}
-
-function loadWorld(){
- try{
-  const data=JSON.parse(
-   localStorage.getItem('blockworld-save')||'null'
-  );
-
-  if(!Array.isArray(data)||!data.length)return false;
-
-  for(const mesh of [...blockMeshes]){
-   worldGroup.remove(mesh);
-  }
-
-  blocks.clear();
-  blockMeshes.length=0;
-
-  for(const b of data){
-   if(Array.isArray(b)&&b.length>=4){
-    addBlock(b[0],b[1],b[2],b[3],false);
-   }
-  }
-
-  return true;
- }catch(error){
-  console.warn('Unable to load saved world:',error);
-  return false;
- }
-}
-
-/* =========================
-   TERRAIN AND TREES
-========================= */
-
-function terrainHeight(x,z){
- return Math.max(1,Math.floor(
-  2+
-  Math.sin(x*.23)*1.25+
-  Math.cos(z*.2)*1.05+
-  Math.sin((x+z)*.13)*1.2+
-  Math.cos(x*.09-z*.15)*1.3
- ));
-}
-
-function makeTree(x,z){
- const ground=groundHeight(x,z);
-
- for(let y=1;y<=4;y++){
-  addBlock(x,ground+y,z,'Wood',false);
- }
-
- for(let dx=-2;dx<=2;dx++){
-  for(let dz=-2;dz<=2;dz++){
-   for(let dy=2;dy<=5;dy++){
-    if(Math.abs(dx)+Math.abs(dz)+(dy===5?1:0)<=4){
-     addBlock(
-      x+dx,ground+dy,z+dz,'Leaves',false
-     );
-    }
-   }
-  }
- }
-}
-
-/* =========================
-   VILLAGE GENERATION
-========================= */
-
-function villageBlock(x,y,z,type){
- addBlock(x,y,z,type,false);
-}
-
-function clearTreeArea(cx,cz,r){
- for(let x=cx-r;x<=cx+r;x++){
-  for(let z=cz-r;z<=cz+r;z++){
-   const top=groundHeight(x,z);
-
-   for(let y=top+1;y<=top+7;y++){
-    const mesh=blocks.get(keyOf(x,y,z));
-
-    if(mesh){
-     worldGroup.remove(mesh);
-     blocks.delete(keyOf(x,y,z));
-
-     const i=blockMeshes.indexOf(mesh);
-     if(i!==-1)blockMeshes.splice(i,1);
-    }
-   }
-  }
- }
-}
-
-function buildPath(cx,cz,dx,dz,length){
- for(let i=-length;i<=length;i++){
-  for(let w=-1;w<=1;w++){
-   const x=Math.round(cx+dx*i+dz*w);
-   const z=Math.round(cz+dz*i-dx*w);
-   const y=groundHeight(x,z);
-
-   const old=blocks.get(keyOf(x,y,z));
-
-   if(old){
-    worldGroup.remove(old);
-    blocks.delete(keyOf(x,y,z));
-
-    const j=blockMeshes.indexOf(old);
-    if(j!==-1)blockMeshes.splice(j,1);
-   }
-
-   villageBlock(x,y,z,'Cobble');
-  }
- }
-
-}
-
-function buildHouse(cx,cz,style=0){
- const base=groundHeight(cx,cz);
- const halfW=style===2?3:2;
- const halfD=style===2?3:2;
-
- const wall=style===1?'Cobble':'Planks';
- const roof=style===2?'Brick':'Wood';
-
- // Foundation.
- for(let x=-halfW;x<=halfW;x++){
-  for(let z=-halfD;z<=halfD;z++){
-   villageBlock(cx+x,base,cz+z,'Cobble');
-  }
- }
-
- // Four walls, windows and doorway.
- for(let y=1;y<=3;y++){
-  for(let x=-halfW;x<=halfW;x++){
-   for(let z=-halfD;z<=halfD;z++){
-    const edge=
-     Math.abs(x)===halfW||
-     Math.abs(z)===halfD;
-
-    if(!edge)continue;
-
-    // Leave an opening at the front.
-    if(z===halfD&&x===0&&y<=2)continue;
-
-    const window=
-     y===2&&(
-      (z===halfD&&Math.abs(x)===halfW-1)||
-      (x===halfW&&Math.abs(z)===1)
-     );
-
-    villageBlock(
-     cx+x,base+y,cz+z,
-     window?'Glass':wall
-    );
-   }
-  }
- }
-
- // Flat roof with a ridge.
- for(let x=-halfW-1;x<=halfW+1;x++){
-  for(let z=-halfD-1;z<=halfD+1;z++){
-   villageBlock(cx+x,base+4,cz+z,roof);
-  }
- }
-
- for(let x=-halfW;x<=halfW;x++){
-  villageBlock(cx+x,base+5,cz,roof);
- }
-
- // Door panels.
- villageBlock(cx,base+1,cz+halfD,'Wood');
- villageBlock(cx,base+2,cz+halfD,'Wood');
-
- // Interior floor.
- for(let x=-halfW+1;x<halfW;x++){
-  for(let z=-halfD+1;z<halfD;z++){
-   villageBlock(cx+x,base+1,cz+z,'Planks');
-  }
- }
-
- // Light and decorations.
- villageBlock(cx,base+2,cz,'Glowstone');
-
- if(style===2){
-  for(let x=-1;x<=1;x++){
-   villageBlock(cx+x,base+1,cz-1,'Bookshelf');
-  }
- }
-
- // Porch.
- for(let x=-1;x<=1;x++){
-  villageBlock(cx+x,base,cz+halfD+1,'Planks');
- }
-}
-
-function buildFarm(cx,cz){
- const base=groundHeight(cx,cz);
-
- for(let x=-3;x<=3;x++){
-  for(let z=-2;z<=2;z++){
-   villageBlock(cx+x,base,cz+z,'Dirt');
-
-   if((x+z)%2===0){
-    villageBlock(cx+x,base+1,cz+z,'Moss');
-   }
-  }
- }
-
- for(let x=-3;x<=3;x++){
-  villageBlock(cx+x,base+1,cz,'Glass');
- }
-}
-
-/* =========================
-   VILLAGER CHARACTERS
-========================= */
-
-function makeVillager(x,z,index){
- const group=new THREE.Group();
-
- const skin=new THREE.MeshLambertMaterial({
-  color:0xc99368
- });
-
- const robeColors=[
-  0x4d86bd,0x5c9a4d,0x9162ae,0xa77942
- ];
-
- const robe=new THREE.MeshLambertMaterial({
-  color:robeColors[index%robeColors.length]
- });
-
- const dark=new THREE.MeshLambertMaterial({
-  color:0x45332d
- });
-
- const eye=new THREE.MeshLambertMaterial({
-  color:0x222222
- });
-
- function part(w,h,d,material,px,py,pz){
-  const mesh=new THREE.Mesh(
-   new THREE.BoxGeometry(w,h,d),
-   material
-  );
-
-  mesh.position.set(px,py,pz);
-  mesh.castShadow=true;
-  group.add(mesh);
-  return mesh;
- }
-
- part(.58,.75,.38,robe,0,.95,0);
- part(.52,.52,.48,skin,0,1.58,0);
- part(.55,.16,.51,dark,0,1.86,0);
-
- part(.12,.09,.05,eye,-.13,1.61,.245);
- part(.12,.09,.05,eye,.13,1.61,.245);
-
- part(.15,.27,.15,robe,-.2,.45,0);
- part(.15,.27,.15,robe,.2,.45,0);
-
- group.position.set(
-  x,groundHeight(x,z)+.5,z
- );
-
- scene.add(group);
-
- const villager={
-  group,
-  x,z,
-  homeX:x,
-  homeZ:z,
-  phase:Math.random()*6,
-  speed:.3+Math.random()*.25,
-  targetX:x,
-  targetZ:z,
-  nextMove:0
- };
-
- villagers.push(villager);
-}
-
-function generateVillages(){
- for(const v of villagers){
-  scene.remove(v.group);
- }
- villagers.length=0;
-
- const centers=[
-  [-13,-13],
-  [14,12],
-  [-15,14]
- ];
-
- centers.forEach(([cx,cz],index)=>{
-  clearTreeArea(cx,cz,10);
-
-  // Central square and connecting paths.
-  buildPath(cx,cz,1,0,5);
-  buildPath(cx,cz,0,1,5);
-
-  // Four houses.
-  buildHouse(cx-5,cz-5,0);
-  buildHouse(cx+5,cz-5,1);
-  buildHouse(cx-5,cz+5,2);
-  buildHouse(cx+5,cz+5,0);
-
-  buildPath(cx-5,cz,0,1,4);
-  buildPath(cx+5,cz,0,1,4);
-  buildPath(cx,cz-5,1,0,4);
-  buildPath(cx,cz+5,1,0,4);
-
-  // Farm and streetlights.
-  buildFarm(cx+9,cz-3);
-
-  for(const [dx,dz] of [
-   [-2,-2],[2,-2],[-2,2],[2,2]
-  ]){
-   const x=cx+dx;
-   const z=cz+dz;
-   const y=groundHeight(x,z);
-
-   villageBlock(x,y+1,z,'Wood');
-   villageBlock(x,y+2,z,'Glowstone');
-  }
-
-  // Four villagers in each village.
-  for(let i=0;i<4;i++){
-   makeVillager(
-    cx+(Math.random()*6-3),
-    cz+(Math.random()*6-3),
-    index+i
-   );
-  }
- });
-}
-
-/* =========================
-   WORLD CREATION
-========================= */
-
-function generateWorld(){
- worldVersion++;
-
- for(const mesh of [...blockMeshes]){
-  worldGroup.remove(mesh);
- }
-
- blocks.clear();
- blockMeshes.length=0;
- heightMap.clear();
-
- for(const v of villagers){
-  scene.remove(v.group);
- }
- villagers.length=0;
-
- // Generate terrain first.
- for(let x=-23;x<=23;x++){
-  for(let z=-23;z<=23;z++){
-   const h=terrainHeight(x,z);
-   heightMap.set(`${x},${z}`,h);
-
-   for(let y=0;y<=h;y++){
-    let type=y===h?'Grass':y>h-3?'Dirt':'Stone';
-
-    if(y===0)type='Bedrock';
-
-    addBlock(x,y,z,type,false);
-   }
-
-   const noise=Math.abs(
-    Math.sin(x*127.1+z*311.7)*43758.5453
-   )%1;
-
-   const nearSpawn=
-    Math.abs(x)<5&&Math.abs(z)<5;
-
-   const nearVillage=
-    (Math.abs(x+13)<10&&Math.abs(z+13)<10)||
-    (Math.abs(x-14)<10&&Math.abs(z-12)<10)||
-    (Math.abs(x+15)<10&&Math.abs(z-14)<10);
-
-   if(noise>.986&&!nearSpawn&&!nearVillage&&h<6){
-    makeTree(x,z);
-   }
-  }
- }
-
- // Small sandy clearing near spawn.
- for(let x=-2;x<=2;x++){
-  for(let z=4;z<=6;z++){
-   const y=groundHeight(x,z);
-   const old=blocks.get(keyOf(x,y,z));
-
-   if(old){
-    worldGroup.remove(old);
-    blocks.delete(keyOf(x,y,z));
-
-    const i=blockMeshes.indexOf(old);
-    if(i!==-1)blockMeshes.splice(i,1);
-   }
-
-   addBlock(x,y,z,'Sand',false);
-  }
- }
-
- // Build the three villages.
- generateVillages();
- saveWorld();
-}
-
-/* =========================
-   PLAYER MOVEMENT
-========================= */
-
-function isSolidAt(x,y,z){
- const mesh=blocks.get(
-  keyOf(Math.round(x),Math.round(y),Math.round(z))
- );
-
- return !!mesh&&mesh.userData.type!=='Glass';
-}
-
-function canOccupy(x,y,z){
- // The player occupies approximately two blocks vertically.
- const px=Math.round(x);
- const py=Math.floor(y);
- const pz=Math.round(z);
-
- for(let dx=-1;dx<=1;dx++){
-  for(let dz=-1;dz<=1;dz++){
-   if(isSolidAt(px+dx,py,pz+dz))return false;
-   if(isSolidAt(px+dx,py+1,pz+dz))return false;
-  }
- }
-
- return true;
-}
-
-function movePlayerHorizontal(nx,nz){
- // Axis-separated movement lets the player slide against walls.
- if(Math.abs(nx)>22.5||Math.abs(nz)>22.5)return;
-
- const oldX=player.x;
- const oldZ=player.z;
-
- if(canOccupy(nx,player.y-1.2,player.z)){
-  player.x=nx;
- }
-
- if(canOccupy(player.x,player.y-1.2,nz)){
-  player.z=nz;
- }
-
- // Avoid getting trapped by a block placed around the player.
- if(!canOccupy(player.x,player.y-1.2,player.z)){
-  player.x=oldX;
-  player.z=oldZ;
- }
-
- // Gentle step-up on one-block terrain changes.
- const oldGround=groundHeight(oldX,oldZ);
- const newGround=groundHeight(player.x,player.z);
-
- if(!creative&&newGround>oldGround&&newGround-oldGround<=1){
-  player.y=Math.max(player.y,newGround+1.7);
- }
-}
-
-function updatePlayer(dt){
- if(!playing)return;
-
- const forward=new THREE.Vector3(
-  -Math.sin(yaw),0,-Math.cos(yaw)
- );
-
- const right=new THREE.Vector3(
-  Math.cos(yaw),0,-Math.sin(yaw)
- );
-
- const move=new THREE.Vector3();
-
- if(keys.w||keys.arrowup)move.add(forward);
- if(keys.s||keys.arrowdown)move.sub(forward);
- if(keys.d||keys.arrowright)move.add(right);
- if(keys.a||keys.arrowleft)move.sub(right);
-
- if(move.lengthSq()>0){
-  move.normalize();
-
-  const speed=creative?7:5;
-  const nx=player.x+move.x*speed*dt;
-  const nz=player.z+move.z*speed*dt;
-
-  movePlayerHorizontal(nx,nz);
- }
-
- const floor=groundHeight(player.x,player.z)+1.7;
-
- if(creative){
-  if(keys[' '])player.y+=7*dt;
-  if(keys.shift)player.y-=7*dt;
-
-  player.y=Math.max(1.7,player.y);
- }else{
-  velocityY-=22*dt;
-  player.y+=velocityY*dt;
-
-  if(player.y<=floor){
-   player.y=floor;
-   velocityY=0;
-   onGround=true;
-  }else{
-   onGround=false;
-  }
- }
-
- if(player.y< -10){
-  player.x=0;
-  player.z=0;
-  player.y=groundHeight(0,0)+2;
-  velocityY=0;
- }
-
- camera.position.set(player.x,player.y,player.z);
- camera.rotation.set(pitch,yaw,0,'YXZ');
-}
-
-/* =========================
-   VILLAGER AI
-========================= */
-
-function updateVillagers(dt,time){
- for(const v of villagers){
-  v.phase+=dt*v.speed;
-
-  if(time>v.nextMove){
-   v.targetX=v.homeX+(Math.random()*6-3);
-   v.targetZ=v.homeZ+(Math.random()*6-3);
-   v.nextMove=time+2+Math.random()*4;
-  }
-
-  const dx=v.targetX-v.x;
-  const dz=v.targetZ-v.z;
-  const dist=Math.hypot(dx,dz);
-
-  if(dist>.15){
-   const step=Math.min(dist,v.speed*dt);
-
-   v.x+=dx/dist*step;
-   v.z+=dz/dist*step;
-
-   v.group.rotation.y=Math.atan2(dx,dz);
-  }
-
-  v.group.position.x=v.x;
-  v.group.position.z=v.z;
-  v.group.position.y=groundHeight(v.x,v.z)+.5+
-   Math.sin(v.phase*3)*.025;
- }
-}
-
-/* =========================
-   MINING AND BUILDING
-========================= */
-
-function getTargetBlock(){
- camera.updateMatrixWorld();
- raycaster.setFromCamera(center,camera);
- raycaster.far=7;
-
- const hits=raycaster.intersectObjects(blockMeshes,false);
+function getTarget(){
+ raycaster.setFromCamera(screenCenter,camera);
+ const objects=Array.from(blockMeshes.values());
+ const hits=raycaster.intersectObjects(objects,false);
  return hits.length?hits[0]:null;
 }
-
 function mineBlock(){
- if(!playing)return;
-
- const hit=getTargetBlock();
- if(hit){
-  removeBlock(hit.object);
- }
+ const hit=getTarget();
+ if(!hit){toast('Look at a block to mine it');return;}
+ const p=hit.object.position;
+ if(removeBlock(p.x,p.y,p.z)){updateStats();}
 }
-
 function placeBlock(){
- if(!playing)return;
-
- const hit=getTargetBlock();
- if(!hit)return;
-
- const normal=hit.face.normal.clone()
-  .transformDirection(hit.object.matrixWorld);
-
- const p=hit.object.position.clone().add(normal);
-
- const x=Math.round(p.x);
- const y=Math.round(p.y);
- const z=Math.round(p.z);
-
- // Don't place a block inside the player's body.
- if(Math.abs(x-player.x)<.8&&
-    Math.abs(z-player.z)<.8&&
-    y>=player.y-2&&y<=player.y){
-  toast('Move away to place a block');
-  return;
+ const hit=getTarget();
+ if(!hit){toast('Look at a block to place next to it');return;}
+ const n=hit.face.normal;
+ const x=Math.round(hit.object.position.x+n.x);
+ const y=Math.round(hit.object.position.y+n.y);
+ const z=Math.round(hit.object.position.z+n.z);
+ if(Math.abs(x)>worldRadius||Math.abs(z)>worldRadius){toast('That is outside the world boundary');return;}
+ if(Math.abs(x-player.x)<.8&&Math.abs(z-player.z)<.8&&Math.abs(y-(player.y-eyeHeight))<2.1){
+  toast('You cannot place a block inside yourself');return;
  }
-
- const type=blockTypes[selected];
-
- if(addBlock(x,y,z,type)){
-  toast(type+' placed');
- }
+ if(addBlock(x,y,z,selectedBlock))updateStats();
 }
-
-/* =========================
-   GAME MENU AND INPUT
-========================= */
-
-function startGame(){
- playing=true;
- menu.style.display='none';
- crosshair.style.display='block';
- hotbar.style.display='flex';
-
- stats.innerHTML=
-  (creative?'CREATIVE MODE':'SURVIVAL MODE')+
-  '<br>GREEN VALLEY · 3 VILLAGES';
-
- if(innerWidth>650){
-  renderer.domElement.requestPointerLock?.();
- }
+function isSolidAt(x,y,z){
+ return hasBlock(Math.floor(x+.5),Math.floor(y+.5),Math.floor(z+.5));
 }
-
-document.getElementById('playBtn').onclick=()=>{
- startGame();
-};
-
-document.getElementById('creativeBtn').onclick=()=>{
- creative=!creative;
-
- document.getElementById('creativeBtn').textContent=
-  creative?'CREATIVE: ON':'SURVIVAL: ON';
-
- stats.innerHTML=
-  (creative?'CREATIVE MODE':'SURVIVAL MODE')+
-  '<br>GREEN VALLEY · 3 VILLAGES';
-
- toast(creative?'Creative mode enabled':'Survival mode enabled');
-};
-
-document.getElementById('resetBtn').onclick=()=>{
- if(confirm('Create a new world? Your saved buildings will be replaced.')){
-  localStorage.removeItem('blockworld-save');
-
-  generateWorld();
-
-  player.x=0;
-  player.z=0;
-  player.y=groundHeight(0,0)+2;
-  velocityY=0;
-  yaw=0;
-  pitch=0;
-
-  toast('New world and villages generated!');
+function canOccupy(x,y,z){
+ const r=.3;
+ const feet=y;
+ const head=y+1.75;
+ for(const px of [x-r,x+r]){
+  for(const pz of [z-r,z+r]){
+   for(const py of [feet+.05,feet+.8,head-.05]){
+    if(isSolidAt(px,py,pz))return false;
+   }
+  }
  }
-};
-
-document.addEventListener('pointerlockchange',()=>{
- if(!document.pointerLockElement&&playing){
-  menu.style.display='flex';
-  document.getElementById('playBtn').textContent='▶ RESUME GAME';
-  crosshair.style.display='none';
- }
-});
-
-document.addEventListener('mousemove',e=>{
- if(!playing||document.pointerLockElement!==renderer.domElement)return;
-
- yaw-=e.movementX*.0022;
- pitch-=e.movementY*.0022;
-
- pitch=Math.max(-1.52,Math.min(1.52,pitch));
-});
-
-document.addEventListener('keydown',e=>{
- const k=e.key.toLowerCase();
- keys[k]=true;
-
- if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k)){
-  e.preventDefault();
- }
-
- if(e.key>='1'&&e.key<='9'){
-  selected=Number(e.key)-1;
-  buildHotbar();
- }
-
- if(e.code==='Space'&&onGround&&playing&&!creative){
-  velocityY=8.5;
-  onGround=false;
- }
-
- if(k==='escape'&&playing){
-  menu.style.display='flex';
-  document.getElementById('playBtn').textContent='▶ RESUME GAME';
- }
-});
-
-document.addEventListener('keyup',e=>{
- keys[e.key.toLowerCase()]=false;
-});
-
-renderer.domElement.addEventListener('contextmenu',e=>{
- e.preventDefault();
-});
-
-renderer.domElement.addEventListener('mousedown',e=>{
- if(!playing)return;
-
- if(document.pointerLockElement!==renderer.domElement){
-  renderer.domElement.requestPointerLock?.();
-  return;
- }
-
- if(e.button===0)mineBlock();
- if(e.button===2)placeBlock();
-});
-
-renderer.domElement.addEventListener('wheel',e=>{
- if(!playing)return;
-
- selected=(
-  selected+(e.deltaY>0?1:-1)+blockTypes.length
- )%blockTypes.length;
-
- buildHotbar();
-},{passive:true});
-
-/* =========================
-   MOBILE CONTROLS
-========================= */
-
-document.querySelectorAll('#touch button').forEach(btn=>{
- const key=btn.dataset.key;
-
- btn.addEventListener('pointerdown',e=>{
-  e.preventDefault();
-  btn.setPointerCapture(e.pointerId);
-  keys[key]=true;
- });
-
- const release=()=>{
-  keys[key]=false;
- };
-
- btn.addEventListener('pointerup',release);
- btn.addEventListener('pointercancel',release);
- btn.addEventListener('lostpointercapture',release);
-});
-
-document.getElementById('jumpBtn').addEventListener('pointerdown',e=>{
- e.preventDefault();
+ return true;
+}
+function movePlayer(dt){
+ const speed=creative?8:5.2;
+ let forward=0,side=0;
+ if(keys.KeyW||keys.ArrowUp)forward+=1;
+ if(keys.KeyS||keys.ArrowDown)forward-=1;
+ if(keys.KeyA||keys.ArrowLeft)side-=1;
+ if(keys.KeyD||keys.ArrowRight)side+=1;
+ if(touchMoves.forward)forward+=1;
+ if(touchMoves.back)forward-=1;
+ if(touchMoves.left)side-=1;
+ if(touchMoves.right)side+=1;
+ const length=Math.hypot(forward,side)||1;
+ forward/=length;side/=length;
+ const dx=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed*dt;
+ const dz=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed*dt;
+ const nx=THREE.MathUtils.clamp(player.x+dx,-worldRadius+.5,worldRadius-.5);
+ const nz=THREE.MathUtils.clamp(player.z+dz,-worldRadius+.5,worldRadius-.5);
 
  if(creative){
-  keys[' ']=true;
- }else if(onGround&&playing){
-  velocityY=8.5;
-  onGround=false;
+  player.x=nx;player.z=nz;
+  if(keys.Space||keys.ArrowUp&&keys.ShiftLeft)player.y+=speed*dt;
+  if(keys.ShiftLeft||keys.ControlLeft)player.y-=speed*dt;
+  player.y=Math.max(1,Math.min(80,player.y));
+  player.vy=0;
+ }else{
+  // Horizontal movement is checked separately to reduce wall and house clipping.
+  if(canOccupy(nx,player.y,player.z))player.x=nx;
+  if(canOccupy(player.x,player.y,nz))player.z=nz;
+  player.vy-=19*dt;
+  const nextY=player.y+player.vy*dt;
+  if(canOccupy(player.x,nextY,player.z)){
+   player.y=nextY;player.onGround=false;
+  }else{
+   if(player.vy<0)player.onGround=true;
+   player.vy=0;
+  }
+  if(player.y<1){player.y=surfaceY(Math.round(player.x),Math.round(player.z))+1;player.vy=0;}
  }
-});
-
-document.getElementById('jumpBtn').addEventListener('pointerup',()=>{
- keys[' ']=false;
-});
-
-document.getElementById('jumpBtn').addEventListener('pointercancel',()=>{
- keys[' ']=false;
-});
-
-document.getElementById('mineBtn').addEventListener('click',mineBlock);
-document.getElementById('placeBtn').addEventListener('click',placeBlock);
-
-// Drag on the screen to look around on touch devices.
-let lookPointer=null;
-let lastLookX=0;
-let lastLookY=0;
-
-renderer.domElement.addEventListener('pointerdown',e=>{
- if(!playing||e.pointerType==='mouse')return;
-
- lookPointer=e.pointerId;
- lastLookX=e.clientX;
- lastLookY=e.clientY;
-});
-
-renderer.domElement.addEventListener('pointermove',e=>{
- if(!playing||e.pointerType==='mouse'||lookPointer!==e.pointerId)return;
-
- const dx=e.clientX-lastLookX;
- const dy=e.clientY-lastLookY;
-
- yaw-=dx*.006;
- pitch-=dy*.006;
-
- pitch=Math.max(-1.52,Math.min(1.52,pitch));
-
- lastLookX=e.clientX;
- lastLookY=e.clientY;
-});
-
-function endLook(e){
- if(lookPointer===e.pointerId)lookPointer=null;
 }
-
-renderer.domElement.addEventListener('pointerup',endLook);
-renderer.domElement.addEventListener('pointercancel',endLook);
-
-/* =========================
-   STARTUP
-========================= */
-
-const clock=new THREE.Clock();
-
-generateWorld();
-
-// Restore saved blocks after the default world has been generated.
-loadWorld();
-
-player.x=0;
-player.z=0;
-player.y=groundHeight(0,0)+1.7;
-
+const touchMoves={forward:false,back:false,left:false,right:false};
+function jump(){
+ if(creative){player.y=Math.min(80,player.y+2);return;}
+ if(player.onGround||player.vy===0){player.vy=7.5;player.onGround=false;}
+}
+function updateCamera(){
+ camera.position.set(player.x,player.y+eyeHeight,player.z);
+ camera.rotation.order='YXZ';
+ camera.rotation.y=yaw;
+ camera.rotation.x=pitch;
+}
+function updateVillagers(dt){
+ for(const v of villagers){
+  v.phase+=dt*v.speed;
+  if(Math.random()<dt*.08)v.turn+=(Math.random()-.5)*2.2;
+  const nx=v.x+Math.sin(v.phase)*dt*.45;
+  const nz=v.z+Math.cos(v.phase*.8)*dt*.45;
+  if(Math.abs(nx)<worldRadius-1&&Math.abs(nz)<worldRadius-1){
+   v.x=nx;v.z=nz;
+  }
+  v.group.position.set(v.x,surfaceY(Math.round(v.x),Math.round(v.z))+1,v.z);
+  v.group.rotation.y=v.turn+Math.sin(v.phase)*.15;
+ }
+}
 function animate(){
  requestAnimationFrame(animate);
-
  const dt=Math.min(clock.getDelta(),.04);
- const time=clock.elapsedTime;
-
- updatePlayer(dt);
- updateVillagers(dt,time);
-
+ if(!menu.classList.contains('hidden')){
+  // Keep the scene rendered behind the menu.
+ }else{
+  movePlayer(dt);
+  updateVillagers(dt);
+  updateCamera();
+ }
  renderer.render(scene,camera);
+ if(Date.now()-lastSave>45000&&lastSave!==0){saveWorld();}
 }
+renderer.domElement.addEventListener('click',()=>{
+ if(menu.classList.contains('hidden')&&!pointerLocked&&matchMedia('(pointer:fine)').matches){
+  renderer.domElement.requestPointerLock?.();
+ }
+});
+document.addEventListener('pointerlockchange',()=>{
+ pointerLocked=document.pointerLockElement===renderer.domElement;
+});
+document.addEventListener('mousemove',e=>{
+ if(!pointerLocked)return;
+ yaw-=e.movementX*.0022;
+ pitch-=e.movementY*.0022;
+ pitch=THREE.MathUtils.clamp(pitch,-Math.PI/2+.02,Math.PI/2-.02);
+});
+document.addEventListener('contextmenu',e=>e.preventDefault());
+renderer.domElement.addEventListener('mousedown',e=>{
+ if(!menu.classList.contains('hidden'))return;
+ if(e.button===0){
+  if(pointerLocked)mineBlock();
+  else if(matchMedia('(pointer:fine)').matches)renderer.domElement.requestPointerLock?.();
+ }
+ if(e.button===2)placeBlock();
+});
+document.addEventListener('keydown',e=>{
+ keys[e.code]=true;
+ if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+ if(e.code==='Space'&&!e.repeat&&menu.classList.contains('hidden'))jump();
+ if(e.code.startsWith('Digit')){
+  const n=Number(e.code.slice(5));
+  if(n>=1&&n<=9)selectBlock(n-1);
+  if(n===0)selectBlock(9);
+ }
+ if(e.code==='Escape'&&!pointerLocked)openMenu();
+ if(e.code==='KeyE')switchMode();
+});
+document.addEventListener('keyup',e=>keys[e.code]=false);
 
-animate();
+let lastTouchX=0,lastTouchY=0,touchLooking=false;
+renderer.domElement.addEventListener('touchstart',e=>{
+ if(menu.classList.contains('hidden')&&e.touches.length){
+  lastTouchX=e.touches[0].clientX;lastTouchY=e.touches[0].clientY;touchLooking=true;
+ }
+},{passive:true});
+renderer.domElement.addEventListener('touchmove',e=>{
+ if(!touchLooking||!menu.classList.contains('hidden')||!e.touches.length)return;
+ const t=e.touches[0],dx=t.clientX-lastTouchX,dy=t.clientY-lastTouchY;
+ yaw-=dx*.006;pitch-=dy*.006;
+ pitch=THREE.MathUtils.clamp(pitch,-Math.PI/2+.02,Math.PI/2-.02);
+ lastTouchX=t.clientX;lastTouchY=t.clientY;
+},{passive:true});
+renderer.domElement.addEventListener('touchend',()=>touchLooking=false,{passive:true});
 
-addEventListener('resize',()=>{
+document.querySelectorAll('[data-move]').forEach(btn=>{
+ const dir=btn.dataset.move;
+ const start=e=>{e.preventDefault();touchMoves[dir]=true;};
+ const stop=e=>{e.preventDefault();touchMoves[dir]=false;};
+ btn.addEventListener('touchstart',start,{passive:false});
+ btn.addEventListener('touchend',stop,{passive:false});
+ btn.addEventListener('touchcancel',stop,{passive:false});
+ btn.addEventListener('mousedown',start);
+ btn.addEventListener('mouseup',stop);
+ btn.addEventListener('mouseleave',stop);
+});
+document.getElementById('jumpButton').addEventListener('click',jump);
+document.getElementById('mineButton').addEventListener('click',mineBlock);
+document.getElementById('placeButton').addEventListener('click',placeBlock);
+
+function openMenu(){
+ menu.classList.remove('hidden');
+ if(document.pointerLockElement)document.exitPointerLock();
+}
+function closeMenu(){
+ menu.classList.add('hidden');
+ if(matchMedia('(pointer:fine)').matches)renderer.domElement.requestPointerLock?.();
+}
+document.getElementById('playButton').addEventListener('click',closeMenu);
+document.getElementById('menuButton').addEventListener('click',openMenu);
+document.getElementById('modeButton').addEventListener('click',switchMode);
+document.getElementById('menuModeButton').addEventListener('click',switchMode);
+document.getElementById('saveButton').addEventListener('click',saveWorld);
+document.getElementById('newWorldButton').addEventListener('click',()=>{
+ if(confirm('Create a new world? This replaces the currently loaded world.')){
+  worldSeed=Math.floor(Math.random()*999999);
+  generateWorld();
+  localStorage.removeItem('blockworld-save');
+  updateModeButtons();
+  menu.classList.add('hidden');
+ }
+});
+window.addEventListener('resize',()=>{
  camera.aspect=innerWidth/innerHeight;
  camera.updateProjectionMatrix();
-
  renderer.setSize(innerWidth,innerHeight);
 });
+window.addEventListener('beforeunload',()=>{
+ try{
+  const data={
+   seed:worldSeed,radius:worldRadius,creative,
+   player:{x:player.x,y:player.y,z:player.z,yaw,pitch},
+   blocks:Array.from(blocks.values()).map(b=>[b.x,b.y,b.z,b.type])
+  };
+  localStorage.setItem('blockworld-save',JSON.stringify(data));
+ }catch(e){}
+});
 
+buildHotbar();
+generateWorld();
+loadWorld();
+updateModeButtons();
+updateCamera();
+animate();
 </script>
 </body>
 </html>
